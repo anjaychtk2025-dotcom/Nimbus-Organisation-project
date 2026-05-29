@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Nimbus Organisation Project</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+:root{
+/*  THEME: NEBULA */
+--bg-dark:#1a0061;
+--bg-deep:#2a0059;
+--primary:#b97bff;
+--secondary:#fda2ff;
+--accent:#ffeeb2;
+--danger:#ff4757;
+--success:#2ed573;
+--glass:rgba(185,123,255,.12);
+--glass-border:rgba(255,238,178,.25);
+--text-main: #ffffff;
+--input-bg: rgba(0,0,0,0.4);
+--card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* THEME: CYBERPUNK */
+body.theme-cyberpunk {
+--bg-dark:#0d0221;
+--bg-deep:#1a0533;
+--primary:#00f3ff;
+--secondary:#bc13fe;
+--accent:#ffee00;
+--glass:rgba(0, 243, 255, 0.1);
+--glass-border:rgba(188, 19, 254, 0.4);
+--input-bg: rgba(0,0,0,0.6);
+}
+
+/* THEME: DEEP SEA */
+body.theme-deepsea {
+--bg-dark:#001e2b;
+--bg-deep:#00334e;
+--primary:#00adb5;
+--secondary:#a2d5f2;
+--accent:#fff;
+--glass:rgba(0, 173, 181, 0.15);
+--glass-border:rgba(162, 213, 242, 0.3);
+--input-bg: rgba(0,0,0,0.4);
+}
+
+/* DEFAULT THEME: MIDNIGHT (OLED) */
+body.theme-midnight {
+--bg-dark:#000000;
+--bg-deep:#050505;
+--primary:#bb86fc;
+--secondary:#03dac6;
+--accent:#ffffff;
+--glass:rgba(30,30,30,0.8);
+--glass-border:#333;
+--text-main: #e0e0e0;
+--input-bg: #111;
+--card-shadow: 0 0 10px rgba(187, 134, 252, 0.2);
+}
+
+/* THEME: DAYLIGHT */
+body.theme-daylight {
+--bg-dark:#f0f2f5;
+--bg-deep:#ffffff;
+--primary:#6200ea;
+--secondary:#00b0ff;
+--accent:#ffd740;
+--danger:#d50000;
+--success:#00c853;
+--glass:rgba(255,255,255,0.6);
+--glass-border:rgba(0,0,0,0.1);
+--text-main: #333333;
+--input-bg: #ffffff;
+--card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+*{box-sizing:border-box; scroll-behavior: smooth;}
+
+body{
+margin:0;font-family:Segoe UI,sans-serif;color:var(--text-main);
+background: radial-gradient(circle at top left, var(--primary)44, transparent 40%),
+            radial-gradient(circle at bottom right, var(--secondary)44, transparent 40%),
+            linear-gradient(135deg,var(--bg-dark),var(--bg-deep));
+background-size: 100% 100%; 
+background-attachment: fixed;
+min-height:100vh;
+overflow-x:hidden;
+transition: background 0.5s ease, color 0.5s ease;
+}
+
+/* Parallax */
+.p-bg { position: fixed; z-index: -1; border-radius: 50%; filter: blur(80px); opacity: 0.4; pointer-events: none; }
+.p-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: var(--primary); }
+.p-2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: var(--secondary); }
+
+nav{
+position:sticky;top:0;z-index:100;
+display:flex;justify-content:space-between;align-items:center;
+padding:14px 28px;background:var(--glass);backdrop-filter:blur(18px);
+border-bottom: 1px solid var(--glass-border);
+transition: 0.3s;
+}
+.logo{font-size:28px;font-weight:800;color:var(--accent); letter-spacing: 1px; text-shadow: 0 0 10px var(--primary);}
+.links button{
+background:none;border:none;color:var(--text-main);margin:0 8px;cursor:pointer;
+font-size:16px; padding: 5px 10px; border-radius: 4px; transition: 0.3s; opacity: 0.8;
+}
+.links button:hover, .links button.active{color:var(--accent); opacity: 1; background: rgba(255,255,255,0.1);}
+.login-btn{
+background:var(--primary);color:white;border:none;padding:10px 22px;border-radius:25px;
+cursor:pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+transition: transform 0.2s;
+}
+.login-btn:hover{transform: translateY(-2px);}
+.glass{
+background:var(--glass);
+backdrop-filter:blur(18px);
+border:1px solid var(--glass-border);
+border-radius:22px;
+box-shadow: var(--card-shadow);
+}
+.container{max-width:1200px;margin:auto;padding:20px; margin-bottom: 100px;}
+.hero{padding:40px 30px;text-align:center; margin-bottom: 40px;}
+.hero h1{font-size:60px;margin:0; text-shadow: 0 0 20px var(--primary); letter-spacing: 2px;}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+.card{padding:20px; position: relative;}
+.section{display:none; animation: slideUp 0.5s ease-out;}
+.section.active{display:block}
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+.home-content {
+text-align: left; line-height: 1.8; font-size: 1.1rem; color: var(--text-main);
+max-width: 900px; margin: 0 auto; padding: 40px;
+background: var(--glass); border-radius: 15px;
+}
+.home-content h2 { color: var(--primary); border-bottom: 2px solid var(--secondary); padding-bottom: 10px; }
+.home-content p { margin-bottom: 20px; }
+
+input,textarea,select{width:100%;padding:12px;margin:8px 0;border-radius:10px;
+border:1px solid var(--glass-border); background: var(--input-bg); color: var(--text-main);
+font-family: inherit; transition: 0.3s;}
+input:focus, textarea:focus{outline: none; border-color: var(--primary); background: var(--input-bg);}
+
+/* Modals */
+.modal-window{
+display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
+justify-content:center;align-items:center;z-index:999; backdrop-filter: blur(5px);
+}
+.modal-inner{width:420px;padding:25px; position: relative; max-width: 90%;}
+
+.avatar{
+width:100px;height:100px;border-radius:50%;
+background:var(--primary);display:flex;align-items:center;justify-content:center;
+font-size:40px;font-weight:bold; overflow: hidden; border: 3px solid var(--accent);
+}
+
+/* Chat & QA */
+#chatBox, #qaBox, #adminUserList { max-height: 500px; overflow-y: auto; padding: 10px; scrollbar-width: thin; scrollbar-color: var(--primary) transparent; }
+.msg-row{margin-bottom: 12px; display: flex; flex-direction: column;}
+.msg-meta{font-size: 0.75rem; color: var(--secondary); margin-bottom: 2px; display:flex; justify-content:space-between; align-items:center;}
+.msg-bubble{padding: 10px 15px; border-radius: 12px; background: rgba(255,255,255,0.05); display: inline-block; max-width: 80%; word-wrap: break-word; position: relative;}
+.msg-bubble.announcement{ background: rgba(255, 190, 11, 0.2); border: 1px solid rgba(255, 190, 11, 0.5); color: #fffbe6; max-width: 100%; text-align: center; font-weight: bold; }
+.delete-btn { color: var(--danger); cursor: pointer; font-size: 0.8rem; margin-left: 10px; opacity: 0.6; border:none; background:none; }
+.delete-btn:hover { opacity: 1; text-decoration: underline; }
+
+.qa-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 15px 0; margin-bottom: 10px; }
+.q-question { font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; color: var(--accent); }
+.q-answer { background: rgba(46, 213, 115, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid var(--success); margin-top: 10px; }
+.q-controls { margin-top: 10px; display: flex; gap: 10px; }
+
+/* Admin */
+.user-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+.user-table th, .user-table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--glass-border); }
+.user-table th { color: var(--secondary); }
+.role-badge { padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; font-weight: bold; }
+.role-owner { background: gold; color: black; }
+.role-admin { background: var(--primary); color: white; }
+.role-user { background: #555; color: #ccc; }
+.btn-small { padding: 5px 10px; cursor: pointer; border: none; border-radius: 4px; font-size: 0.8rem; margin-right: 5px;}
+.btn-promote { background: var(--success); color: white; }
+.btn-ban { background: var(--danger); color: white; }
+
+/* --- ADVANCED AI UI --- */
+#aiBtn {
+display: none; position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px;
+border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+color: white; border: none;
+box-shadow: 0 0 0 0 rgba(185, 123, 255, 0.7); cursor: pointer; z-index: 1000;
+font-size: 32px; transition: all 0.3s ease;
+animation: pulse-purple 2s infinite;
+}
+@keyframes pulse-purple {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(185, 123, 255, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(185, 123, 255, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(185, 123, 255, 0); }
+}
+#aiBtn:hover { transform: scale(1.1) rotate(10deg); }
+
+#aiWindow {
+display: none; position: fixed; bottom: 110px; right: 30px; width: 380px; height: 550px;
+z-index: 1000; flex-direction: column;
+border-radius: 25px; overflow: hidden; 
+box-shadow: 0 15px 50px rgba(0,0,0,0.6);
+background: var(--bg-deep); border: 1px solid var(--glass-border);
+backdrop-filter: blur(20px);
+opacity: 0; transform: translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#aiWindow.open { opacity: 1; transform: translateY(0); }
+
+.ai-header {
+background: linear-gradient(90deg, var(--primary), var(--secondary)); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;
+}
+.ai-profile { display: flex; align-items: center; gap: 10px; font-weight: bold; }
+.ai-avatar { width: 35px; height: 35px; background: white; color: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; }
+
+.ai-body { 
+flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; 
+background: rgba(0,0,0,0.1); 
+}
+.ai-msg { padding: 12px 16px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; max-width: 85%; position: relative; word-wrap: break-word;}
+.ai-msg.bot { 
+background: var(--input-bg); color: var(--text-main); align-self: flex-start; 
+border-bottom-left-radius: 4px; border: 1px solid var(--glass-border); 
+}
+.ai-msg.user { 
+background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; 
+align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+}
+
+/* Typing Indicator */
+.typing-indicator {
+display: inline-flex; align-items: center; gap: 4px; padding: 10px 15px;
+background: var(--input-bg); border-radius: 18px; border-bottom-left-radius: 4px; margin-bottom: 5px;
+display: none; /* Hidden by default */
+}
+.typing-indicator span {
+width: 6px; height: 6px; background: var(--text-main); border-radius: 50%;
+animation: typing 1.4s infinite ease-in-out both; opacity: 0.6;
+}
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+@keyframes typing { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+
+.ai-input-area { padding: 15px; border-top: 1px solid var(--glass-border); display: flex; gap: 10px; background: var(--glass); }
+.ai-input-area input {
+border-radius: 20px; margin: 0; background: rgba(0,0,0,0.2); border: none;
+}
+.ai-send-btn {
+width: 45px; height: 45px; border-radius: 50%; background: var(--primary); border: none;
+color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+transition: transform 0.2s;
+}
+.ai-send-btn:hover { transform: scale(1.1); }
+
+/* Google Link Style in Chat */
+.google-link { color: var(--accent); text-decoration: underline; cursor: pointer; }
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+</style>
+</head>
+<body class="theme-nebula">
+
+<!-- Parallax Elements -->
+<div class="p-bg p-1" id="p1"></div>
+<div class="p-bg p-2" id="p2"></div>
+
+<nav>
+<div class="logo">NIMBUS CAR</div>
+<div class="links">
+<button onclick="show('home')" id="nav-home">Home</button>
+<button onclick="show('dashboard')" id="nav-dashboard">Dashboard</button>
+<button onclick="show('projects')" id="nav-projects">Projects</button>
+<button onclick="show('team')" id="nav-team">Team</button>
+<button onclick="secure('qa')" id="nav-qa">Q&A 🔒</button>
+<button onclick="secure('chat')" id="nav-chat">Chat 🔒</button>
+<button onclick="openHelpModal()" id="nav-help" style="color:var(--accent)">Contact Owner ✉️</button>
+<button onclick="show('settings')" id="nav-settings">Settings</button>
+<button id="adminBtn" onclick="secure('admin')" style="display:none;color:#ffeeb2">Admin 👑</button>
+</div>
+<button id="loginBtn" class="login-btn" onclick="openLogin()">Login</button>
+</nav>
+
+<!-- LOGIN MODAL -->
+<div id="loginModal" class="modal-window">
+<div class="glass modal-inner">
+<h2 style="margin-top:0">Sign In</h2>
+<input id="name" placeholder="Full Name">
+<input id="email" placeholder="Email Address">
+<input id="pass" type="password" placeholder="Password">
+<button class="login-btn" onclick="manualLogin()">Login</button>
+<hr>
+<h4>Google Sign-In</h4>
+<div id="g_id_onload"
+     data-client_id="1009246355280-dcpmpkek7j9rts5kpkdb9obraak9hp8s.apps.googleusercontent.com"
+     data-callback="handleCredentialResponse">
+</div>
+<div class="g_id_signin" data-type="standard"></div>
+<br><button onclick="closeLogin()" style="background:transparent; border:1px solid var(--text-main); color:var(--text-main); padding:8px 16px; border-radius:20px; cursor:pointer;">Close</button>
+</div>
+</div>
+
+<!-- BAN ALERT MODAL -->
+<div id="banModal" class="modal-window" style="background:#a000;">
+    <div class="glass modal-inner" style="text-align:center; border: 2px solid var(--danger);">
+        <h1 style="color:var(--danger)">🚫 ACCOUNT SUSPENDED</h1>
+        <p>You have been banned from the Nimbus Portal.</p>
+        <h3 id="banReasonText">Reason: Violation of Community Guidelines</h3>
+        <p id="banDurationText">Duration: Permanent</p>
+        <button class="login-btn" style="background:#555" onclick="location.reload()">Try Again Later</button>
+    </div>
+</div>
+
+<!-- HELP OWNER MODAL -->
+<div id="helpModal" class="modal-window">
+<div class="glass modal-inner">
+<h2 style="margin-top:0; color:var(--accent)">Contact Owner</h2>
+<p>Send a private message directly to <strong>anjaychtk2025@gmail.com</strong>.</p>
+<input id="helpSubject" placeholder="Subject">
+<textarea id="helpMessage" rows="4" placeholder="Type your message here..."></textarea>
+<button class="login-btn" onclick="sendHelpMessage()">Send Message</button>
+<br><button onclick="document.getElementById('helpModal').style.display='none'" style="margin-top:10px; background:transparent; border:none; color:var(--text-main); cursor:pointer">Cancel</button>
+</div>
+</div>
+
+<!-- ADVANCED AI UI -->
+<button id="aiBtn" onclick="toggleAI()">🤖</button>
+<div id="aiWindow">
+    <div class="ai-header">
+        <div class="ai-profile">
+            <div class="ai-avatar">N</div>
+            <div>
+                <div>Nimbus AI</div>
+                <div style="font-size:0.7rem; opacity:0.8;">Research Assistant</div>
+            </div>
+        </div>
+        <button onclick="toggleAI()" style="background:none; border:none; color:white; font-size:24px; cursor:pointer;">&times;</button>
+    </div>
+    
+    <div class="ai-body" id="aiChatBody">
+        <div class="ai-msg bot">Hello! I'm the Nimbus Research Assistant. I can answer questions about our Maglev technology or help you find info on the web.</div>
+    </div>
+
+    <!-- Typing Indicator -->
+    <div id="typingIndicator" class="typing-indicator" style="margin-left: 20px; margin-bottom: 10px;">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="ai-input-area">
+        <input id="aiInput" placeholder="Ask about research..." onkeypress="if(event.key==='Enter') sendAIMessage()">
+        <button class="ai-send-btn" onclick="sendAIMessage()">➤</button>
+    </div>
+</div>
+
+<div class="container">
+
+<!-- HOME -->
+<section id="home" class="section active">
+<div class="glass hero">
+<h1>PROJECT NIMBUS</h1>
+<p>Advanced Research & Development Initiative</p>
+</div>
+
+<div class="home-content glass">
+<h2>The Future is Frictionless</h2>
+<p>Welcome to the dawn of a new era in terrestrial transportation. The Nimbus Car is a Research & Development initiative designed to eliminate friction, reduce carbon footprints to zero, and redefine the very concept of the journey.</p>
+
+<h2>Hyper-Sus™ Technology</h2>
+<p>At the heart of the Nimbus lies our proprietary Hyper-Sus™ system. Utilizing onboard superconducting magnets, the vehicle levitates up to 10 centimeters above the road. This eliminates rolling resistance, allowing us to achieve speeds exceeding 400 km/h with a silence that is profound.</p>
+
+<h2>Intelligent Core</h2>
+<p>The Nimbus is equipped with the "Nimbus Core," a neural processing unit capable of 400 trillion operations per second. It communicates with city infrastructure in real-time via a 6G mesh network to create an accident-free traffic flow.</p>
+
+<h2>Sustainability</h2>
+<p>Powered by a solid-state hydrogen fuel cell with a range of 1,200 kilometers. The only emission is pure water vapor.</p>
+</div>
+</section>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="section">
+<h2>Dashboard</h2>
+<div class="grid">
+<div class="glass card"><h3>Active Projects</h3><h1 style="color:var(--secondary)">12</h1></div>
+<div class="glass card"><h3>Team Members</h3><h1 style="color:var(--primary)">24</h1></div>
+<div class="glass card"><h3>Pending Tasks</h3><h1 style="color:var(--danger)">85</h1></div>
+<div class="glass card"><h3>Efficiency</h1><h1 style="color:var(--success)">98.2%</h1></div>
+</div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects" class="section">
+<div class="glass card">
+<h2>Projects</h2>
+<div class="grid">
+<div class="glass card"><h3>Maglev Research</h3><p>Phase 1 completion</p></div>
+<div class="glass card"><h3>Prototype V3</h3><p>Assembly started</p></div>
+<div class="glass card"><h3>AI Navigation</h3><p>Algorithm testing</p></div>
+</div>
+</div>
+</section>
+
+<!-- PROFILE -->
+<section id="profile" class="section">
+<div class="glass card" style="max-width:500px; margin:0 auto;">
+<div class="avatar" id="avatar">U</div>
+<h2 id="profileHeader" style="text-align:center">User Profile</h2>
+<input id="profileName" placeholder="Display Name">
+<textarea id="profileBio" placeholder="Bio" rows="3"></textarea>
+<button class="login-btn" onclick="saveProfile()">Save Profile</button>
+</div>
+</section>
+
+<!-- TEAM -->
+<section id="team" class="section">
+<div class="glass card">
+<h2>Team Directory</h2>
+<ul>
+<li>Engineering Team (Lead: Sarah J.)</li>
+<li>Research Team (Lead: Dr. A. Smith)</li>
+<li>Operations Team (Lead: Mike R.)</li>
+<li>Design Team (Lead: Emily W.)</li>
+</ul>
+</div>
+</section>
+
+<!-- CHAT -->
+<section id="chat" class="section">
+<div class="glass card">
+<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--glass-border); padding-bottom:10px; margin-bottom:10px;">
+<h2>Global Comms</h2>
+<span id="chatRoleBadge" style="font-size:0.8rem; color:var(--secondary)"></span>
+</div>
+<div id="chatBox"></div>
+<div style="margin-top:15px; border-top:1px solid var(--glass-border); padding-top:10px;">
+<div id="announcementControls" style="display:none; margin-bottom:10px;">
+<label style="font-size:0.9rem; color:var(--accent);">
+<input type="checkbox" id="isAnnouncement" style="width:auto; margin:0 5px;"> Official Announcement
+</label>
+</div>
+<div style="display:flex; gap:10px;">
+<input id="msgInput" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMsg()">
+<button class="login-btn" onclick="sendMsg()">Send</button>
+</div>
+</div>
+</div>
+</section>
+
+<!-- Q&A -->
+<section id="qa" class="section">
+<div class="glass card">
+<h2>Knowledge Base</h2>
+<p style="font-size:0.9rem; opacity:0.7">Ask technical questions. Admins provide verified answers.</p>
+<div style="background:var(--input-bg); padding:15px; border-radius:12px; margin-bottom:20px;">
+<input id="questionInput" placeholder="Ask about Nimbus tech...">
+<button class="login-btn" onclick="askQuestion()">Submit</button>
+</div>
+<div id="qaBox"></div>
+</div>
+</section>
+
+<!-- SETTINGS -->
+<section id="settings" class="section">
+<div class="glass card">
+<h2>Settings</h2>
+<h3>Interface Theme</h3>
+<select id="themeSelect" onchange="changeTheme(this.value)">
+    <option value="theme-nebula">Nebula (Default)</option>
+    <option value="theme-cyberpunk">Cyberpunk (Neon)</option>
+    <option value="theme-deepsea">Deep Sea (Calm)</option>
+    <option value="theme-midnight">Midnight (OLED Black)</option>
+    <option value="theme-daylight">Daylight (Light Mode)</option>
+</select>
+<p>Notifications</p>
+<select><option>All Enabled</option><option>Mentions Only</option></select>
+<button class="login-btn" style="background:var(--danger); margin-top:20px;" onclick="logout()">Logout</button>
+</div>
+</section>
+
+<!-- ADMIN -->
+<section id="admin" class="section">
+<div class="glass card">
+<div style="display:flex; justify-content:space-between; align-items:center;">
+<h2>Admin Control Panel</h2>
+<span style="font-size:0.8rem; color:var(--danger)">OWNER ACCESS ONLY</span>
+</div>
+<hr>
+<h3>Owner Inbox 📨</h3>
+<div id="ownerInbox" style="max-height: 200px; overflow-y: auto; background:var(--input-bg); padding:10px; border-radius:10px; margin-bottom:20px;"></div>
+
+<h3>User Management</h3>
+<table class="user-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Email</th>
+<th>Role</th>
+<th>Ban Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody id="adminUserList"></tbody>
+</table>
+</div>
+</section>
+
+</div>
+
+<script>
+// --- CONSTANTS & STATE ---
+const OWNER_EMAIL = "anjaychtk2025@gmail.com";
+const STORAGE_KEYS = {
+    USERS: 'nimbus_users_v4',
+    CHAT: 'nimbus_chat_v4',
+    QA: 'nimbus_qa_v4',
+    THEME: 'nimbus_theme',
+    OWNER_MSGS: 'nimbus_owner_msgs_v1'
+};
+
+let currentUser = null;
+
+// --- INIT ---
+window.onload = function() {
+    const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'theme-nebula';
+    changeTheme(savedTheme);
+    document.getElementById('themeSelect').value = savedTheme;
+
+    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || "[]");
+    if(users.length === 0) {
+        users = [
+            { name: "Nimbus Owner", email: OWNER_EMAIL, role: "owner", bannedUntil: null },
+            { name: "Jane Engineer", email: "jane@example.com", role: "user", bannedUntil: null },
+            { name: "Bob Designer", email: "bob@example.com", role: "user", bannedUntil: null },
+            { name: "Alice Admin", email: "alice@example.com", role: "admin", bannedUntil: null }
+        ];
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    }
+    
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        document.getElementById('p1').style.transform = `translateY(${scrolled * 0.5}px)`;
+        document.getElementById('p2').style.transform = `translateY(${scrolled * -0.3}px)`;
+    });
+
+    const savedSession = sessionStorage.getItem('nimbus_session');
+    if(savedSession) {
+        const sessionUser = JSON.parse(savedSession);
+        if(checkBanStatus(sessionUser.email)) return;
+        const dbUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
+        const freshUser = dbUsers.find(u => u.email === sessionUser.email);
+        if(freshUser) loginUserState(freshUser, sessionUser.picture);
+    }
+}
+
+// --- THEME ---
+function changeTheme(themeName) {
+    document.body.className = themeName;
+    localStorage.setItem(STORAGE_KEYS.THEME, themeName);
+}
+
+// --- AUTH ---
+function openLogin(){ document.getElementById('loginModal').style.display='flex'; }
+function closeLogin(){ document.getElementById('loginModal').style.display='none'; }
+function openHelpModal(){ 
+    if(!currentUser){ alert("Please login to contact the owner."); return; }
+    document.getElementById('helpModal').style.display='flex'; 
+}
+
+function checkBanStatus(email) {
+    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS));
+    const user = users.find(u => u.email === email);
+    if(user && user.bannedUntil) {
+        const now = Date.now();
+        if(now < user.bannedUntil) {
+            const date = new Date(user.bannedUntil);
+            document.getElementById('banDurationText').innerText = `Banned until: ${date.toLocaleString()}`;
+            document.getElementById('banModal').style.display='flex';
+            return true;
+        } else {
+            user.bannedUntil = null;
+            localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+        }
+    }
+    return false;
+}
+
+function manualLogin(){
+    const n = document.getElementById('name').value.trim();
+    const e = document.getElementById('email').value.trim();
+    const p = document.getElementById('pass').value.trim();
+    if(!n || !e || !p){ alert('Fill all fields'); return; }
+    if(checkBanStatus(e)) return;
+    const userObj = getOrCreateUser(n, e);
+    loginUserState(userObj);
+}
+
+function handleCredentialResponse(response) {
+    const payload = JSON.parse(atob(response.credential.split('.')[1]));
+    if(checkBanStatus(payload.email)) return;
+    const userObj = getOrCreateUser(payload.name, payload.email);
+    loginUserState(userObj, payload.picture);
+}
+
+function getOrCreateUser(name, email) {
+    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || "[]");
+    let user = users.find(u => u.email === email);
+    if (!user) {
+        const role = email === OWNER_EMAIL ? "owner" : "user";
+        user = { name, email, role, bannedUntil: null };
+        users.push(user);
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    } else {
+        user.name = name;
+        localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
+    }
+    return user;
+}
+
+function loginUserState(user, pictureUrl = null) {
+    currentUser = user;
+    sessionStorage.setItem('nimbus_session', JSON.stringify(currentUser));
+    document.getElementById('loginBtn').style.display = "none";
+    document.getElementById('avatar').innerHTML = pictureUrl 
+        ? `<img src="${pictureUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+        : user.name.charAt(0).toUpperCase();
+    
+    if(currentUser.role === 'owner' || currentUser.role === 'admin') {
+        document.getElementById('adminBtn').style.display = 'inline';
+        document.getElementById('adminBtn').innerText = currentUser.role === 'owner' ? 'Owner 👑' : 'Admin 🛡️';
+    }
+    document.getElementById('aiBtn').style.display = 'block';
+    closeLogin();
+    show('dashboard');
+    refreshData();
+}
+
+function logout() {
+    currentUser = null;
+    sessionStorage.removeItem('nimbus_session');
+    location.reload();
+}
+
+// --- NAVIGATION ---
+function show(id){
+    document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.links button').forEach(b => b.classList.remove('active'));
+    const navBtn = document.getElementById('nav-'+id);
+    if(navBtn) navBtn.classList.add('active');
+    if(id === 'chat') renderChat();
+    if(id === 'qa') renderQA();
+    if(id === 'admin') renderAdminPanel();
+}
+function secure(id){
+    if(!currentUser){ openLogin(); return; }
+    show(id);
+}
+
+// --- OWNER CONTACT ---
+function sendHelpMessage() {
+    const subject = document.getElementById('helpSubject').value.trim();
+    const msg = document.getElementById('helpMessage').value.trim();
+    if(!subject || !msg) { alert("Please fill subject and message."); return; }
+    const msgs = JSON.parse(localStorage.getItem(STORAGE_KEYS.OWNER_MSGS) || "[]");
+    msgs.push({ from: currentUser.name, email: currentUser.email, subject: subject, message: msg, timestamp: new Date().toLocaleString() });
+    localStorage.setItem(STORAGE_KEYS.OWNER_MSGS, JSON.stringify(msgs));
+    alert("Message sent to Owner!");
+    document.getElementById('helpModal').style.display='none';
+    document.getElementById('helpSubject').value = "";
+    document.getElementById('helpMessage').value = "";
+}
+
+// --- SMART AI ENGINE ---
+function toggleAI() {
+    const win = document.getElementById('aiWindow');
+    if(win.style.display === 'flex') {
+        win.style.display = 'none';
+        win.classList.remove('open');
+    } else {
+        win.style.display = 'flex';
+        setTimeout(() => win.classList.add('open'), 10);
+        setTimeout(() => document.getElementById('aiChatBody').scrollTop = document.getElementById('aiChatBody').scrollHeight, 100);
+    }
+}
+
+function sendAIMessage() {
+    const input = document.getElementById('aiInput');
+    const txt = input.value.trim();
+    if(!txt) return;
+
+    addAIMessage(txt, 'user');
+    input.value = '';
+    
+    // Show typing indicator
+    const indicator = document.getElementById('typingIndicator');
+    indicator.style.display = 'inline-flex';
+    document.getElementById('aiChatBody').scrollTop = document.getElementById('aiChatBody').scrollHeight;
+
+    // Simulate thinking time
+    setTimeout(() => {
+        indicator.style.display = 'none';
+        const response = getSmartAIResponse(txt);
+        addAIMessage(response, 'bot');
+    }, 1200); // 1.2s delay for realism
+}
+
+function addAIMessage(text, sender) {
+    const body = document.getElementById('aiChatBody');
+    const div = document.createElement('div');
+    div.className = `ai-msg ${sender}`;
+    // Allow HTML for links
+    div.innerHTML = text;
+    body.appendChild(div);
+    body.scrollTop = body.scrollHeight;
+}
+
+function getSmartAIResponse(input) {
+    const lower = input.toLowerCase();
+    const userName = currentUser ? currentUser.name : "Traveler";
+
+    // 1. Personal Greetings
+    if(lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) 
+        return `Hello ${userName}! I can assist with our Research & Development data.`;
+    
+    if(lower.includes('how are you')) 
+        return "System operational. Ready to answer your questions about our prototype.";
+
+    if(lower.includes('your name') || lower.includes('who are you')) 
+        return "I am Nimbus AI, a digital assistant for the Nimbus Research Initiative. I help with tech specs and general queries.";
+
+    // 2. CORRECTED LOGIC: NOT FOR SALE
+    if(lower.includes('price') || lower.includes('cost') || lower.includes('buy') || lower.includes('sell') || lower.includes('purchase') || lower.includes('order')) 
+        return "Project Nimbus is strictly a Research & Development initiative. We are currently in the prototype phase and **do not sell vehicles**. We are building the future technology, not a dealership.";
+    
+    // 3. Technical Knowledge Base
+    if(lower.includes('speed') || lower.includes('fast') || lower.includes('0-60')) 
+        return "Our prototype V3 utilizes magnetic levitation to reach **0-100 km/h in 1.9 seconds** theoretically, as friction is eliminated. The top speed target is 400 km/h.";
+    
+    if(lower.includes('range') || lower.includes('battery') || lower.includes('fuel')) 
+        return "We utilize a **Solid-State Hydrogen Fuel Cell**. Target range is **1,200 kilometers**, emitting only water vapor.";
+    
+    if(lower.includes('levitate') || lower.includes('magnet') || lower.includes('hover')) 
+        return "The Hyper-Sus™ system floats the car **10cm** above the surface using superconducting magnets and reactive road coatings.";
+
+    if(lower.includes('safety') || lower.includes('crash')) 
+        return "Safety is priority #1. The graphene chassis is stronger than steel. The 6G mesh network coordinates with other cars to prevent collisions before they occur.";
+
+    // 4. General/Fun
+    if(lower.includes('joke')) 
+        return "Why did the prototype go to school? To improve its class! 🏫";
+
+    // 5. Fallback to Google Search (Link Generation)
+    return `I don't have that specific data in my R&D database, but I can look it up for you.<br><br>
+    <a href="https://www.google.com/search?q=${encodeURIComponent(input)}" target="_blank" class="google-link">🔍 Click to search Google for "${input}"</a>`;
+}
+
+
+// --- GLOBAL CHAT SYSTEM ---
+function sendMsg(){
+    const txt = document.getElementById('msgInput').value.trim();
+    if(!txt) return;
+    const isAnn = document.getElementById('isAnnouncement').checked;
+    if(isAnn && currentUser.role === 'user') { alert("Only Admins can post announcements."); return; }
+    const newMsg = { id: Date.now(), text: txt, user: currentUser.name, email: currentUser.email, role: currentUser.role, type: isAnn ? 'announcement' : 'normal', timestamp: new Date().toLocaleTimeString() };
+    let chat = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT) || "[]"); chat.push(newMsg); localStorage.setItem(STORAGE_KEYS.CHAT, JSON.stringify(chat));
+    document.getElementById('msgInput').value = ""; document.getElementById('isAnnouncement').checked = false; renderChat();
+    const box = document.getElementById('chatBox'); box.scrollTop = box.scrollHeight;
+}
+
+function deleteMessage(id) {
+    if(!confirm("Delete this message?")) return;
+    let chat = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT) || "[]"); chat = chat.filter(m => m.id !== id); localStorage.setItem(STORAGE_KEYS.CHAT, JSON.stringify(chat)); renderChat();
+}
+
+function canDelete(msg) {
+    if(!currentUser) return false;
+    if(currentUser.email === msg.email) return true;
+    if(currentUser.role === 'admin' && msg.role === 'user') return true;
+    if(currentUser.role === 'owner') return true;
+    return false;
+}
+
+function renderChat() {
+    const chat = JSON.parse(localStorage.getItem(STORAGE_KEYS.CHAT) || "[]"); const box = document.getElementById('chatBox'); box.innerHTML = "";
+    const controls = document.getElementById('announcementControls');
+    if(currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin')) {
+        controls.style.display = 'block'; document.getElementById('chatRoleBadge').textContent = `[${currentUser.role.toUpperCase()}]`;
+    } else { controls.style.display = 'none'; document.getElementById('chatRoleBadge').textContent = ""; }
+    chat.forEach(msg => {
+        const div = document.createElement('div'); div.className = 'msg-row';
+        const isMe = currentUser && msg.email === currentUser.email; const alignStyle = isMe ? 'align-items: flex-end;' : 'align-items: flex-start;'; div.style.cssText = alignStyle;
+        const typeClass = msg.type === 'announcement' ? 'announcement' : ''; const typeLabel = msg.type === 'announcement' ? ' 📢 ' : ''; let deleteHtml = '';
+        if(canDelete(msg)) { deleteHtml = `<button class="delete-btn" onclick="deleteMessage(${msg.id})">Delete</button>`; }
+        div.innerHTML = `<div class="msg-bubble ${typeClass}"><div class="msg-meta"><span>${msg.user}${typeLabel} • ${msg.timestamp}</span>${deleteHtml}</div>${msg.text}</div>`; box.appendChild(div);
+    }); box.scrollTop = box.scrollHeight;
+}
+
+// --- Q&A SYSTEM ---
+function askQuestion() {
+    const qText = document.getElementById('questionInput').value.trim(); if(!qText) return;
+    const newQ = { id: Date.now(), question: qText, user: currentUser.name, answer: null, answeredBy: null };
+    let qa = JSON.parse(localStorage.getItem(STORAGE_KEYS.QA) || "[]"); qa.unshift(newQ); localStorage.setItem(STORAGE_KEYS.QA, JSON.stringify(qa));
+    document.getElementById('questionInput').value = ""; renderQA();
+}
+
+function answerQuestion(id, ansText) {
+    if(!ansText.trim()) return; let qa = JSON.parse(localStorage.getItem(STORAGE_KEYS.QA) || "[]"); const idx = qa.findIndex(q => q.id === id);
+    if(idx > -1) { qa[idx].answer = ansText; qa[idx].answeredBy = currentUser.name; localStorage.setItem(STORAGE_KEYS.QA, JSON.stringify(qa)); renderQA(); }
+}
+
+function renderQA() {
+    const qa = JSON.parse(localStorage.getItem(STORAGE_KEYS.QA) || "[]"); const box = document.getElementById('qaBox'); box.innerHTML = "";
+    const isAdmin = currentUser && (currentUser.role === 'owner' || currentUser.role === 'admin');
+    qa.forEach(q => {
+        const div = document.createElement('div'); div.className = 'qa-item';
+        let answerHtml = '';
+        if(q.answer) { answerHtml = `<div class="q-answer"><strong>${q.answeredBy}:</strong> ${q.answer}</div>`; }
+        else if (isAdmin) {
+            answerHtml = `<div class="q-controls"><input type="text" id="ans-${q.id}" placeholder="Write answer..." style="flex:1"><button class="btn-small btn-promote" onclick="answerQuestion(${q.id}, document.getElementById('ans-${q.id}').value)">Reply</button></div>`;
+        } else { answerHtml = `<div style="color:var(--secondary); font-size:0.9rem; margin-top:5px;">Pending Admin Reply...</div>`; }
+        div.innerHTML = `<div class="q-question">Q: ${q.question}</div><div style="font-size:0.8rem; opacity:0.6;">Asked by ${q.user}</div>${answerHtml}`; box.appendChild(div);
+    });
+}
+
+// --- ADMIN PANEL ---
+function renderAdminPanel() {
+    if(!currentUser || currentUser.role !== 'owner') return; 
+    const msgs = JSON.parse(localStorage.getItem(STORAGE_KEYS.OWNER_MSGS) || "[]"); const inbox = document.getElementById('ownerInbox');
+    inbox.innerHTML = msgs.length === 0 ? "<p>No new messages.</p>" : "";
+    msgs.forEach(m => {
+        const div = document.createElement('div'); div.style.borderBottom = "1px solid rgba(255,255,255,0.1)"; div.style.padding = "8px 0";
+        div.innerHTML = `<strong>From:</strong> ${m.name} (${m.email})<br><strong>Subj:</strong> ${m.subject}<br>${m.message} <br><small>${m.timestamp}</small>`; inbox.appendChild(div);
+    });
+    const users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || "[]"); const list = document.getElementById('adminUserList'); list.innerHTML = "";
+    users.forEach(u => {
+        if(u.email === OWNER_EMAIL) return; const tr = document.createElement('tr'); const isBanned = u.bannedUntil && Date.now() < u.bannedUntil; let actionHtml = '';
+        if(!isBanned) {
+            if(u.role === 'user') actionHtml += `<button class="btn-small btn-promote" onclick="changeRole('${u.email}', 'admin')">Promote</button>`;
+            else actionHtml += `<button class="btn-small" style="background:var(--danger)" onclick="changeRole('${u.email}', 'user')">Demote</button>`;
+            actionHtml += `<select id="ban-${u.email}" style="width:auto; margin:0; padding:5px;"><option value="60000">1 Min</option><option value="3600000">1 Hour</option><option value="86400000">1 Day</option><option value="9999999999999">Perm</option></select><button class="btn-small btn-ban" onclick="banUser('${u.email}')">Ban</button>`;
+        } else { actionHtml = `<button class="btn-small btn-promote" onclick="unbanUser('${u.email}')">Unban</button>`; }
+        tr.innerHTML = `<td>${u.name}</td><td>${u.email}</td><td><span class="role-badge role-${u.role}">${u.role}</span></td><td style="color:${isBanned ? 'var(--danger)' : 'var(--success)'}">${isBanned ? 'BANNED' : 'Active'}</td><td>${actionHtml}</td>`; list.appendChild(tr);
+    });
+}
+
+function changeRole(email, newRole) {
+    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || "[]"); const idx = users.findIndex(u => u.email === email);
+    if(idx > -1) { users[idx].role = newRole; localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users)); renderAdminPanel(); }
+}
+
+function banUser(email) {
+    const duration = parseInt(document.getElementById(`ban-${email}`).value); let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || "[]"); const idx = users.findIndex(u => u.email === email);
+    if(idx > -1) { users[idx].bannedUntil = Date.now() + duration; localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users)); renderAdminPanel(); alert(`User ${email} has been banned.`); }
+}
+
+function unbanUser(email) {
+    let users = JSON.parse(localStorage.getItem(STORAGE_KEYS.USERS) || "[]"); const idx = users.findIndex(u => u.email === email);
+    if(idx > -1) { users[idx].bannedUntil = null; localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users)); renderAdminPanel(); }
+}
+
+function refreshData() { renderChat(); renderQA(); }
+</script>
+</body>
+</html>
